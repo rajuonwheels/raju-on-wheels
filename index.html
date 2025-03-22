@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
+import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 
 export default function RideCreator() {
   const [rides, setRides] = useState([]);
   const [location, setLocation] = useState(null);
   const [suggestedLocations, setSuggestedLocations] = useState([]);
+  const [newRide, setNewRide] = useState({ name: "", details: "", images: [] });
 
   useEffect(() => {
     if (navigator.geolocation) {
@@ -25,14 +29,27 @@ export default function RideCreator() {
 
   const fetchSuggestedRides = async (lat, lon) => {
     const locations = [
-      "Hill View Point", "River Side Ride", "Coastal Highway", "Forest Trail"
+      { name: "Hill View Point", lat: lat + 0.01, lon: lon + 0.01 },
+      { name: "River Side Ride", lat: lat - 0.01, lon: lon - 0.01 },
+      { name: "Coastal Highway", lat: lat + 0.02, lon: lon - 0.02 },
+      { name: "Forest Trail", lat: lat - 0.02, lon: lon + 0.02 },
     ];
     setSuggestedLocations(locations);
   };
 
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    setNewRide((prev) => ({
+      ...prev,
+      images: [...prev.images, ...files],
+    }));
+  };
+
   const addRide = () => {
-    const newRide = prompt("Enter Ride Name & Details");
-    if (newRide) setRides([...rides, newRide]);
+    if (newRide.name.trim() !== "") {
+      setRides([...rides, newRide]);
+      setNewRide({ name: "", details: "", images: [] });
+    }
   };
 
   return (
@@ -44,13 +61,48 @@ export default function RideCreator() {
       >
         <h2 className="text-2xl font-bold">Create & Track Your Rides</h2>
         <p className="text-gray-600">Easily add and view your rides.</p>
-        <Button onClick={addRide} className="mt-4 w-full">
-          + Add Ride
-        </Button>
+        <div className="mt-4">
+          <Input
+            type="text"
+            placeholder="Ride Name"
+            value={newRide.name}
+            onChange={(e) => setNewRide({ ...newRide, name: e.target.value })}
+            className="mb-2"
+          />
+          <Input
+            type="text"
+            placeholder="Ride Details"
+            value={newRide.details}
+            onChange={(e) => setNewRide({ ...newRide, details: e.target.value })}
+            className="mb-2"
+          />
+          <Input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageUpload}
+            className="mb-2"
+          />
+          <Button onClick={addRide} className="mt-2 w-full">
+            + Add Ride
+          </Button>
+        </div>
         <ul className="mt-4">
           {rides.map((ride, index) => (
             <li key={index} className="mt-2 p-2 bg-gray-100 rounded-lg">
-              {ride}
+              <strong>{ride.name}</strong> - {ride.details}
+              {ride.images.length > 0 && (
+                <div className="mt-2 flex gap-2 overflow-x-auto">
+                  {ride.images.map((image, imgIndex) => (
+                    <img
+                      key={imgIndex}
+                      src={URL.createObjectURL(image)}
+                      alt="Ride"
+                      className="w-24 h-24 object-cover rounded-lg"
+                    />
+                  ))}
+                </div>
+              )}
             </li>
           ))}
         </ul>
@@ -58,19 +110,24 @@ export default function RideCreator() {
         {location && (
           <div className="mt-6">
             <h3 className="text-lg font-bold">Suggested Rides Near You:</h3>
-            <ul className="mt-2">
+            <MapContainer center={[location.latitude, location.longitude]} zoom={13} className="h-64 w-full mt-2 rounded-lg">
+              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+              <Marker position={[location.latitude, location.longitude]}>
+                <Popup>Your Location</Popup>
+              </Marker>
               {suggestedLocations.map((loc, index) => (
-                <li key={index} className="mt-2 p-2 bg-blue-100 rounded-lg">
-                  {loc}
-                </li>
+                <Marker key={index} position={[loc.lat, loc.lon]}>
+                  <Popup>{loc.name}</Popup>
+                </Marker>
               ))}
-            </ul>
+            </MapContainer>
           </div>
         )}
       </motion.div>
     </div>
   );
 }
+
 
 
 
