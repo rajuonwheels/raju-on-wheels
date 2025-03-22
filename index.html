@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 
 export default function RideCreator() {
-  const [username, setUsername] = useState("");
-  const [loggedIn, setLoggedIn] = useState(false);
   const [rides, setRides] = useState([]);
   const [location, setLocation] = useState(null);
   const [suggestedLocations, setSuggestedLocations] = useState([]);
@@ -33,10 +30,6 @@ export default function RideCreator() {
     setSuggestedLocations(locations);
   };
 
-  const handleLogin = () => {
-    if (username.trim() !== "") setLoggedIn(true);
-  };
-
   const addRide = () => {
     const newRide = prompt("Enter Ride Name & Details");
     if (newRide) setRides([...rides, newRide]);
@@ -44,57 +37,40 @@ export default function RideCreator() {
 
   return (
     <div className="p-6 flex flex-col items-center gap-4">
-      {!loggedIn ? (
-        <Card className="w-96 p-4 text-center">
-          <CardContent>
-            <h2 className="text-xl font-bold">Enter a Username</h2>
-            <Input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Username"
-              className="mt-2 w-full"
-            />
-            <Button onClick={handleLogin} className="mt-4 w-full">
-              Start Riding
-            </Button>
-          </CardContent>
-        </Card>
-      ) : (
-        <motion.div
-          className="w-full max-w-lg p-6 bg-white rounded-lg shadow-md"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <h2 className="text-2xl font-bold">Welcome, {username}!</h2>
-          <p className="text-gray-600">Create & track your rides easily.</p>
-          <Button onClick={addRide} className="mt-4 w-full">
-            + Add Ride
-          </Button>
-          <ul className="mt-4">
-            {rides.map((ride, index) => (
-              <li key={index} className="mt-2 p-2 bg-gray-100 rounded-lg">
-                {ride}
-              </li>
-            ))}
-          </ul>
+      <motion.div
+        className="w-full max-w-lg p-6 bg-white rounded-lg shadow-md"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <h2 className="text-2xl font-bold">Create & Track Your Rides</h2>
+        <p className="text-gray-600">Easily add and view your rides.</p>
+        <Button onClick={addRide} className="mt-4 w-full">
+          + Add Ride
+        </Button>
+        <ul className="mt-4">
+          {rides.map((ride, index) => (
+            <li key={index} className="mt-2 p-2 bg-gray-100 rounded-lg">
+              {ride}
+            </li>
+          ))}
+        </ul>
 
-          {location && (
-            <div className="mt-6">
-              <h3 className="text-lg font-bold">Suggested Rides Near You:</h3>
-              <ul className="mt-2">
-                {suggestedLocations.map((loc, index) => (
-                  <li key={index} className="mt-2 p-2 bg-blue-100 rounded-lg">
-                    {loc}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </motion.div>
-      )}
+        {location && (
+          <div className="mt-6">
+            <h3 className="text-lg font-bold">Suggested Rides Near You:</h3>
+            <ul className="mt-2">
+              {suggestedLocations.map((loc, index) => (
+                <li key={index} className="mt-2 p-2 bg-blue-100 rounded-lg">
+                  {loc}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 }
+
 
 
