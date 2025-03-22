@@ -1,7 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -53,77 +50,91 @@ export default function RideCreator() {
   };
 
   return (
-    <div className="p-6 flex flex-col items-center gap-4">
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center py-10">
       <motion.div
-        className="w-full max-w-lg p-6 bg-white rounded-lg shadow-md"
+        className="w-full max-w-xl p-6 bg-gray-800 bg-opacity-90 rounded-lg shadow-lg"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <h2 className="text-2xl font-bold">Create & Track Your Rides</h2>
-        <p className="text-gray-600">Easily add and view your rides.</p>
-        <div className="mt-4">
-          <Input
+        <h2 className="text-3xl font-bold text-center text-blue-400">🏍️ Create & Track Your Rides</h2>
+        <p className="text-gray-400 text-center">Add and view your rides with ease.</p>
+        
+        <div className="mt-6">
+          <input
             type="text"
             placeholder="Ride Name"
             value={newRide.name}
             onChange={(e) => setNewRide({ ...newRide, name: e.target.value })}
-            className="mb-2"
+            className="w-full px-4 py-2 mb-3 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-400"
           />
-          <Input
+          <input
             type="text"
             placeholder="Ride Details"
             value={newRide.details}
             onChange={(e) => setNewRide({ ...newRide, details: e.target.value })}
-            className="mb-2"
+            className="w-full px-4 py-2 mb-3 bg-gray-700 text-white rounded-lg focus:ring-2 focus:ring-blue-400"
           />
-          <Input
+          <input
             type="file"
             accept="image/*"
             multiple
             onChange={handleImageUpload}
-            className="mb-2"
+            className="w-full mb-3 text-gray-300"
           />
-          <Button onClick={addRide} className="mt-2 w-full">
-            + Add Ride
-          </Button>
+          <button onClick={addRide} className="w-full bg-blue-500 py-2 rounded-lg hover:bg-blue-600 transition-all">
+            ➕ Add Ride
+          </button>
         </div>
-        <ul className="mt-4">
+      </motion.div>
+
+      <div className="mt-10 w-full max-w-3xl">
+        {rides.length > 0 && <h3 className="text-2xl text-center text-blue-400">🚀 Your Rides</h3>}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-4">
           {rides.map((ride, index) => (
-            <li key={index} className="mt-2 p-2 bg-gray-100 rounded-lg">
-              <strong>{ride.name}</strong> - {ride.details}
+            <motion.div
+              key={index}
+              className="bg-gray-800 p-4 rounded-lg shadow-lg"
+              whileHover={{ scale: 1.05 }}
+            >
+              <h4 className="text-xl font-bold text-blue-300">{ride.name}</h4>
+              <p className="text-gray-400">{ride.details}</p>
               {ride.images.length > 0 && (
-                <div className="mt-2 flex gap-2 overflow-x-auto">
+                <div className="mt-2 grid grid-cols-2 gap-2">
                   {ride.images.map((image, imgIndex) => (
                     <img
                       key={imgIndex}
                       src={URL.createObjectURL(image)}
                       alt="Ride"
-                      className="w-24 h-24 object-cover rounded-lg"
+                      className="w-full h-24 object-cover rounded-md"
                     />
                   ))}
                 </div>
               )}
-            </li>
+            </motion.div>
           ))}
-        </ul>
+        </div>
+      </div>
 
-        {location && (
-          <div className="mt-6">
-            <h3 className="text-lg font-bold">Suggested Rides Near You:</h3>
-            <MapContainer center={[location.latitude, location.longitude]} zoom={13} className="h-64 w-full mt-2 rounded-lg">
-              <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-              <Marker position={[location.latitude, location.longitude]}>
-                <Popup>Your Location</Popup>
+      {location && (
+        <div className="mt-10 w-full max-w-3xl">
+          <h3 className="text-2xl text-center text-blue-400">📍 Suggested Rides Near You</h3>
+          <MapContainer
+            center={[location.latitude, location.longitude]}
+            zoom={13}
+            className="h-64 w-full mt-2 rounded-lg"
+          >
+            <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            <Marker position={[location.latitude, location.longitude]}>
+              <Popup>Your Location</Popup>
+            </Marker>
+            {suggestedLocations.map((loc, index) => (
+              <Marker key={index} position={[loc.lat, loc.lon]}>
+                <Popup>{loc.name}</Popup>
               </Marker>
-              {suggestedLocations.map((loc, index) => (
-                <Marker key={index} position={[loc.lat, loc.lon]}>
-                  <Popup>{loc.name}</Popup>
-                </Marker>
-              ))}
-            </MapContainer>
-          </div>
-        )}
-      </motion.div>
+            ))}
+          </MapContainer>
+        </div>
+      )}
     </div>
   );
 }
